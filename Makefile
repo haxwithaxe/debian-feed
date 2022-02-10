@@ -5,7 +5,6 @@ install: $(PREFIX)/bin/debian-feed \
 	$(PREFIX)/lib/systemd/system/debian-feed.service \
 	$(PREFIX)/lib/systemd/system/debian-feed.timer
 	systemctl enable debian-feed.timer
-	systemctl start debian-feed.timer
 
 uninstall:
 	systemctl stop debian-feed.timer
