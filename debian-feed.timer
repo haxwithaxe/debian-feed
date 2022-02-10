@@ -6,5 +6,4 @@ OnUnitActiveSec=1d
 Unit=netsensor.service
 
 [Install]
-After=network.target
 WantedBy=timers.target
