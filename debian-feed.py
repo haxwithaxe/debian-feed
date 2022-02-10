@@ -2,6 +2,7 @@
 """Debian installer RSS feed generator."""
 
 import json
+import logging
 import os
 import sys
 
@@ -9,6 +10,9 @@ import bs4
 from feedgen.feed import FeedGenerator
 import feedparser
 import requests
+
+
+log = logging.getLogger('debian-feed')
 
 
 def add_entry(feed, filename, url):
@@ -21,9 +25,31 @@ def add_entry(feed, filename, url):
     entry.link(href=file_url)
 
 
+def _get_page(url):
+    log.debug('Getting %s', url)
+    try:
+        page =  requests.get(url)
+    except requests.exceptions.ConnectionError as err:
+        # Warning since it's not fatal to the workflow unless it happens again.
+        log.warning('Error Connectiong to the server "%s": %s', url, err)
+        return None
+    if not page or not page.ok:
+        log.error('Could not get "%s" for this reason: %s', url, page.reason)
+        return False
+    log.debug('Got: %s %s', url, page.reason)
+    return page
+
+
 def find_new_files(config, url):
     """Find all the target files on the page at `url`."""
-    page = requests.get(url)
+    page = _get_page(url)
+    if page is False:  # Got error from server, ignoring this url
+        return
+    if page is None:  # Error connecting, try again
+        page = _get_page(url)
+    if not page:  # Too many errors, skip to the next url
+        log.error('Failed to connect to the server for "%s" twice.', url)
+        return
     soup = bs4.BeautifulSoup(page.content, features='lxml')
     for tr in soup.find_all('tr'):
         try:
@@ -37,9 +63,9 @@ def find_new_files(config, url):
 def get_urls(config):
     """Returns a generator of all the pages to scrape."""
     for arch in config.get('archs'):
-        for type_ in config.get('types'):
-            for source in config.get('sources'):
-                yield source.format(arch=arch, type_=type_)
+        for source in config.get('sources'):
+            log.debug('url: %s', source.format(arch=arch))
+            yield source.format(arch=arch)
 
 
 def _init_feed():
@@ -75,12 +101,14 @@ def main(config):
         feed = _init_feed()
     for url in get_urls(config):
         for torrent in find_new_files(config, url):
+            log.debug('Found torrent: %s', torrent)
             if os.path.join(url, torrent) not in entries:
                 add_entry(feed, torrent, url)
     feed.rss_file(config.get('rss_file'), pretty=True)
 
 
 if __name__ == '__main__':
+    log.setLevel(logging.ERROR)
     try:
         app_config = json.load(open(sys.argv[1], 'r'))
     except IndexError:
