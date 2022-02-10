@@ -1,10 +1,13 @@
 {
-	"file_extension": ".torrent",
-	"rss_file": "/usr/local/var/cache/debian-feed/debian-feed.rss",
-	"archs": ["amd64"],
-	"types": ["bt-cd", "bt-dvd", "bt-hybrid"],
+	"file_extension": ".torrent", 
+	"rss_file": "/path/to/rss/server/files/debian-feed.rss", 
+	"archs": ["amd64", "i386"],
 	"sources": [
-		"https://cdimage.debian.org/cdimage/release/current-live/{arch}/{type_}/",
-		"https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current/{arch}/{type_}/"
+		"https://cdimage.debian.org/cdimage/release/current-live/{arch}/bt-hybrid/",
+		"https://cdimage.debian.org/cdimage/release/current/{arch}/bt-cd/",
+		"https://cdimage.debian.org/cdimage/release/current/{arch}/bt-dvd/",
+		"https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current/{arch}/bt-cd/",
+		"https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current/{arch}/bt-dvd/",
+		"https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current-live/{arch}/bt-hybrid/"
 	]
 }
