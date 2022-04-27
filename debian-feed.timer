@@ -3,7 +3,7 @@ Description=Debian Installer RSS Feed Generator
 
 [Timer]
 OnUnitActiveSec=1d
-Unit=netsensor.service
+Unit=debian-feed.service
 
 [Install]
 WantedBy=timers.target
